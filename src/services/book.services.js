@@ -29,4 +29,4 @@ class BookDataService {
     }
 }
 
-export default BookDataService();
+export default new BookDataService();
