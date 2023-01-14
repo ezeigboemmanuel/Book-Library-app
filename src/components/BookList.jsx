@@ -8,7 +8,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 function BookList(){
     return (
         <div className='booklist'>
-            <Table striped bordered>
+            <Table striped bordered responsive>
                 <thead>
                     <tr>
                     <th>#</th>
