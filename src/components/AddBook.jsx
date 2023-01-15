@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../App.css'
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Alert from 'react-bootstrap/Alert';
 import BookDataService from "../services/book.services";
 
-function AddBook(){
+function AddBook({id, setBookId}){
     const [title, setTitle] = useState("");
     const [author, setAuthor] = useState("");
     const [message, setMessage] = useState({error: false, msg: ""});
@@ -25,8 +25,14 @@ function AddBook(){
         console.log(newBook);
 
         try{
-            await BookDataService.addBook(newBook);
-            setMessage({error: false, msg: "New Book added successfully!"});
+            if(id !== undefined && id !== ""){
+                await BookDataService.updateBook(id, newBook);
+                setBookId("")
+                setMessage({error: false, msg: "updated successfully!"});
+            }else{
+                await BookDataService.addBook(newBook);
+                setMessage({error: false, msg: "New Book added successfully!"});
+            }
         }catch(err){
             setMessage({error: true, msg: err.message})
         }
@@ -34,6 +40,23 @@ function AddBook(){
         setTitle("")
         setAuthor("")
     }
+
+    const editHandler = async () => {
+        setMessage("")
+        try{
+            const docSnap = await BookDataService.getBook(id);
+            setTitle(docSnap.data().title)
+            setAuthor(docSnap.data().author)
+        }catch(err){
+            setMessage({error: true, msg: err.message})
+        }
+    }
+
+    useEffect(() => {
+        if (id !== undefined && id !== ""){
+            editHandler();
+        }
+    }, [id])
     return (
         <div>
             {message?.msg && (<Alert variant = {message?.error ? "danger" : "success"} dismissible onClose = {() => setMessage("")}>{message?.msg} </Alert>)}

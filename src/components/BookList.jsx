@@ -1,43 +1,69 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../App.css'
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import BookDataService from "../services/book.services";
 
 
-function BookList(){
+function BookList({getBookId}){
+    const [books, setBooks] = useState([]);
+    useEffect(() => {
+        getBooks();
+    }, []);
+
+    const getBooks = async () => {
+        const data = await BookDataService.getAllBooks();
+        console.log(data.docs);
+        setBooks(data.docs.map(doc => ({
+            ...doc.data(), id: doc.id
+        })))
+    }
+
+    const deleteHandler = async (id) => {
+        await BookDataService.deleteBook(id);
+        getBooks();
+    }
     return (
         <div className='booklist'>
+            <div className= "mb-2">
+                <Button variant = "dark" size = "sm" onClick = {getBooks}>Refresh</Button>
+            </div>
             <Table striped bordered responsive>
                 <thead>
                     <tr>
                     <th>#</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Username</th>
+                    <th>Book Title</th>
+                    <th>Book Author</th>
                     <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                    <td>1</td>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                    <td>
-                        <Button variant="secondary" size="sm">Edit</Button> <Button variant="danger" size="sm">Delete</Button>
-                    </td>
-                    </tr>
-                    <tr>
-                    <td>2</td>
-                    <td>Ezeigbo</td>
-                    <td>Emmanuel</td>
-                    <td>@thecodinglord</td>
-                    <td>
-                        <Button variant="secondary" size="sm">Edit</Button> <Button variant="danger" size="sm">Delete</Button>
-                    </td>
-                     
-                    </tr>
+                    {books.map((doc, index) => {
+                        return (
+                            <tr key = {doc.id}>
+                                <td>{index + 1}</td>
+                                <td>{doc.title}</td>
+                                <td>{doc.author}</td>
+                                <td>
+                                    <Button 
+                                    variant="secondary" 
+                                    size="sm" 
+                                    onClick ={(e) => getBookId(doc.id)}
+                                    className = "mx-3"
+                                    >
+                                        Edit
+                                    </Button> 
+                                    <Button 
+                                    variant="danger" 
+                                    size="sm"
+                                    onClick ={(e) => deleteHandler(doc.id)}
+                                    >
+                                        Delete
+                                    </Button>
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </Table>
         </div>
